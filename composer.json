@@ -1,0 +1,16 @@
+{
+    "name": "webqam/magento2-module-emailattachment",
+    "description": "Webqam Magento2 module EmailAttachment",
+    "require": {
+        "php": "~7.0.0"
+    },
+    "type": "magento2-module",
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Webqam\\EmailAttachment\\": ""
+        }
+    }
+}
