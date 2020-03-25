@@ -18,7 +18,7 @@ use Zend\Mime\PartFactory;
 /**
  * Class EmailMessage
  */
-class EmailMessage implements EmailMessageInterface
+class EmailMessage extends \Magento\Framework\Mail\EmailMessage implements EmailMessageInterface
 {
     /** @var PartFactory */
     protected $partFactory;
