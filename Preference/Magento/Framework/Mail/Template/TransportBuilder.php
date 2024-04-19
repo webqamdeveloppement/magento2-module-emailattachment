@@ -2,6 +2,7 @@
 
 namespace Webqam\EmailAttachment\Preference\Magento\Framework\Mail\Template;
 
+use Laminas\Mime\Mime;
 use Magento\Framework\App\TemplateTypesInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\MailException;
@@ -97,6 +98,7 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
      * @var TransportInterfaceFactory
      */
     protected $mailTransportFactory;
+    protected array $attachments = [];
 
     /**
      * Param that used for storing all message data until it will be used
@@ -396,9 +398,12 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
                 'type' => $partType
             ]
         );
+        // Webqam START
+        $parts = count($this->attachments) ? array_merge([$mimePart], $this->attachments) : [$mimePart];
+        // Webqam END
         $this->messageData['encoding'] = $mimePart->getCharset();
         $this->messageData['body'] = $this->mimeMessageInterfaceFactory->create(
-            ['parts' => [$mimePart]]
+            ['parts' => $parts] // Webqam START/END
         );
 
         $this->messageData['subject'] = html_entity_decode(
@@ -437,4 +442,27 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
             $this->messageData[$addressType] = $convertedAddressArray;
         }
     }
+
+    // Webqam START
+    /**
+     * @param string|null $content
+     * @param string|null $fileName
+     * @param string|null $fileType
+     * @return TransportBuilder
+     */
+    public function addAttachment(?string $content, ?string $fileName, ?string $fileType): self
+    {
+        $attachmentPart = $this->mimePartInterfaceFactory->create([
+            'content' => $content,
+            'type' => $fileType,
+            'fileName' => $fileName,
+            'disposition' => Mime::DISPOSITION_ATTACHMENT,
+            'encoding' =>  MIME::ENCODING_BASE64
+        ]);
+
+        $this->attachments[] = $attachmentPart;
+
+        return $this;
+    }
+    // Webqam END
 }
