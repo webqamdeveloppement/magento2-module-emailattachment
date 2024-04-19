@@ -4,7 +4,7 @@
     <!-- Framework classes -->
     <preference for="Magento\Framework\Mail\EmailMessage" type="Webqam\EmailAttachment\Mail\EmailMessage"/>
     <preference for="Magento\Framework\Mail\Template\TransportBuilder"
-                type="Webqam\EmailAttachment\Mail\Template\TransportBuilder"/>
+                type="Webqam\EmailAttachment\Preference\Magento\Framework\Mail\Template\TransportBuilder"/>
     <!-- Emails -->
     <preference for="Magento\Sales\Model\Order\Email\SenderBuilder"
                 type="Webqam\EmailAttachment\Preference\Magento\Sales\Model\Order\Email\SenderBuilder"/>
