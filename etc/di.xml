@@ -2,7 +2,6 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <!-- Framework classes -->
-    <preference for="Magento\Framework\Mail\EmailMessage" type="Webqam\EmailAttachment\Mail\EmailMessage"/>
     <preference for="Magento\Framework\Mail\Template\TransportBuilder"
                 type="Webqam\EmailAttachment\Preference\Magento\Framework\Mail\Template\TransportBuilder"/>
     <!-- Emails -->
