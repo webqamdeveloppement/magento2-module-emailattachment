@@ -1,31 +1,29 @@
 <?php
-declare(strict_types=1);
 
-namespace Webqam\EmailAttachment\Mail\Template;
+namespace Webqam\EmailAttachment\Preference\Magento\Framework\Mail\Template;
+
+use Laminas\Mime\Mime;
 use Magento\Framework\App\TemplateTypesInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\MailException;
-use Magento\Framework\Mail\EmailMessageInterface;
-use Magento\Framework\Mail\EmailMessageInterfaceFactory;
 use Magento\Framework\Mail\AddressConverter;
+use Magento\Framework\Mail\EmailMessageInterfaceFactory;
 use Magento\Framework\Mail\Exception\InvalidArgumentException;
 use Magento\Framework\Mail\MessageInterface;
 use Magento\Framework\Mail\MessageInterfaceFactory;
 use Magento\Framework\Mail\MimeInterface;
 use Magento\Framework\Mail\MimeMessageInterfaceFactory;
 use Magento\Framework\Mail\MimePartInterfaceFactory;
-use Magento\Framework\Mail\Template\FactoryInterface;
-use Magento\Framework\Mail\Template\SenderResolverInterface;
 use Magento\Framework\Mail\TemplateInterface;
 use Magento\Framework\Mail\TransportInterface;
 use Magento\Framework\Mail\TransportInterfaceFactory;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Phrase;
-use Zend\Mime\Mime;
-use Zend\Mime\PartFactory;
+use Magento\Framework\Mail\Template\FactoryInterface;
+use Magento\Framework\Mail\Template\SenderResolverInterface;
 
 /**
- * TransportBuilder
+ * TransportBuilder for Mail Templates
  *
  * @api
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -85,7 +83,7 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
     /**
      * Message
      *
-     * @var EmailMessageInterface
+     * @var MessageInterface
      */
     protected $message;
 
@@ -100,6 +98,7 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
      * @var TransportInterfaceFactory
      */
     protected $mailTransportFactory;
+    protected array $attachments = [];
 
     /**
      * Param that used for storing all message data until it will be used
@@ -127,10 +126,6 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
      * @var AddressConverter|null
      */
     private $addressConverter;
-
-    protected $attachments = [];
-
-    protected $partFactory;
 
     /**
      * TransportBuilder constructor
@@ -172,9 +167,6 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
             ->get(MimePartInterfaceFactory::class);
         $this->addressConverter = $addressConverter ?: $this->objectManager
             ->get(AddressConverter::class);
-        $this->partFactory = $objectManager->get(PartFactory::class);
-        parent::__construct($templateFactory, $message, $senderResolver, $objectManager, $mailTransportFactory, $messageFactory, $emailMessageInterfaceFactory, $mimeMessageInterfaceFactory,
-            $mimePartInterfaceFactory, $addressConverter);
     }
 
     /**
@@ -383,13 +375,14 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
     {
         $template = $this->getTemplate();
         $content = $template->processTemplate();
+
         switch ($template->getType()) {
             case TemplateTypesInterface::TYPE_TEXT:
-                $part['type'] = MimeInterface::TYPE_TEXT;
+                $partType = MimeInterface::TYPE_TEXT;
                 break;
 
             case TemplateTypesInterface::TYPE_HTML:
-                $part['type'] = MimeInterface::TYPE_HTML;
+                $partType = MimeInterface::TYPE_HTML;
                 break;
 
             default:
@@ -397,16 +390,27 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
                     new Phrase('Unknown template type')
                 );
         }
-        $mimePart = $this->mimePartInterfaceFactory->create(['content' => $content]);
+
+        /** @var \Magento\Framework\Mail\MimePartInterface $mimePart */
+        $mimePart = $this->mimePartInterfaceFactory->create(
+            [
+                'content' => $content,
+                'type' => $partType
+            ]
+        );
+        // Webqam START
         $parts = count($this->attachments) ? array_merge([$mimePart], $this->attachments) : [$mimePart];
+        // Webqam END
+        $this->messageData['encoding'] = $mimePart->getCharset();
         $this->messageData['body'] = $this->mimeMessageInterfaceFactory->create(
-            ['parts' => $parts]
+            ['parts' => $parts] // Webqam START/END
         );
 
         $this->messageData['subject'] = html_entity_decode(
             (string)$template->getSubject(),
             ENT_QUOTES
         );
+
         $this->message = $this->emailMessageInterfaceFactory->create($this->messageData);
 
         return $this;
@@ -434,25 +438,31 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
                 $this->messageData[$addressType],
                 $convertedAddressArray
             );
+        } else {
+            $this->messageData[$addressType] = $convertedAddressArray;
         }
     }
 
+    // Webqam START
     /**
      * @param string|null $content
      * @param string|null $fileName
      * @param string|null $fileType
      * @return TransportBuilder
      */
-    public function addAttachment(?string $content, ?string $fileName, ?string $fileType)
+    public function addAttachment(?string $content, ?string $fileName, ?string $fileType): self
     {
-        $attachmentPart = $this->partFactory->create();
-        $attachmentPart->setContent($content)
-            ->setType($fileType)
-            ->setFileName($fileName)
-            ->setDisposition(Mime::DISPOSITION_ATTACHMENT)
-            ->setEncoding(Mime::ENCODING_BASE64);
+        $attachmentPart = $this->mimePartInterfaceFactory->create([
+            'content' => $content,
+            'type' => $fileType,
+            'fileName' => $fileName,
+            'disposition' => Mime::DISPOSITION_ATTACHMENT,
+            'encoding' =>  MIME::ENCODING_BASE64
+        ]);
+
         $this->attachments[] = $attachmentPart;
 
         return $this;
     }
+    // Webqam END
 }

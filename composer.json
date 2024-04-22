@@ -1,7 +1,7 @@
 {
     "name": "webqam/magento2-module-emailattachment",
     "description": "Webqam Magento2 module EmailAttachment",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "authors": [
         {
             "name": "Angélique Estrade",
@@ -9,8 +9,8 @@
         }
     ],
     "suggest": {
-        "magento/product-community-edition": ">=2.3.3",
-        "magento/product-enterprise-edition": ">=2.3.3"
+        "magento/product-community-edition": ">=2.3.6",
+        "magento/product-enterprise-edition": ">=2.3.6"
     },
     "type": "magento2-module",
     "autoload": {
