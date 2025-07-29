@@ -2,7 +2,7 @@
 
 namespace Webqam\EmailAttachment\Preference\Magento\Framework\Mail\Template;
 
-use Laminas\Mime\Mime;
+use Magento\Framework\HTTP\Mime;
 use Magento\Framework\App\TemplateTypesInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\MailException;
