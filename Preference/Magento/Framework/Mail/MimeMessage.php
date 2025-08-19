@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright 2015 Adobe
  * All Rights Reserved.
@@ -8,6 +9,7 @@ declare(strict_types=1);
 namespace Webqam\EmailAttachment\Preference\Magento\Framework\Mail;
 
 use Symfony\Component\Mime\Message;
+use Symfony\Component\Mime\Part\Multipart\MixedPart;
 use Symfony\Component\Mime\Part\TextPart;
 use Symfony\Component\Mime\Part\Multipart\AlternativePart;
 
@@ -28,17 +30,22 @@ class MimeMessage extends \Magento\Framework\Mail\MimeMessage
      */
     public function __construct(array $parts)
     {
+        // WEBQAM START
         $headers = null;
-        $body = null;
+        $mimeParts = [];
 
         foreach ($parts as $part) {
             $mimePart = $part->getMimePart();
+            $mimeParts[] = $mimePart;
             if ($mimePart instanceof TextPart) {
                 $headers = $mimePart->getHeaders();
-                $body = $mimePart;
                 break;
             }
         }
+        $body = count($mimeParts) > 1
+            ? new MixedPart(...$mimeParts)
+            : $mimeParts[0];
+        // WEBQAM END
 
         $this->mimeMessage = new Message($headers, $body);
     }
