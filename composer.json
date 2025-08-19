@@ -1,7 +1,7 @@
 {
     "name": "webqam/magento2-module-emailattachment",
     "description": "Webqam Magento2 module EmailAttachment",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "authors": [
         {
             "name": "Angélique Estrade",
