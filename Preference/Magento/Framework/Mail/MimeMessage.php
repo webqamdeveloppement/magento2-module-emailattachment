@@ -39,7 +39,6 @@ class MimeMessage extends \Magento\Framework\Mail\MimeMessage
             $mimeParts[] = $mimePart;
             if ($mimePart instanceof TextPart) {
                 $headers = $mimePart->getHeaders();
-                break;
             }
         }
         $body = count($mimeParts) > 1
